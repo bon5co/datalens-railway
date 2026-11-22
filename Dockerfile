@@ -5,7 +5,6 @@
 # private network behind a secret path; every other wrapper fetches the keys it needs before starting the upstream entrypoint.
 # 2.9.0 is the newest release of datalens-tech/datalens, checked against the GitHub releases API on 2026-11-23; the component tags
 # below are the ones its versions-config.json pins for that release.
-# upstream: none component images of datalens-tech/datalens 2.9.0, tagged by component version rather than by release
 
 ARG PG=ghcr.io/datalens-tech/datalens-postgres:16-1.3.0@sha256:37ba1c536c68fb5c0f63bc686897ea7bf654e6195e88f450437c020a063163b4
 ARG TEMPORAL=ghcr.io/datalens-tech/datalens-temporal:1.27.2@sha256:e3649e0a76e8ca0adbfa3d9bd1cc36395623049ddedbad926d09c9b979e29579
@@ -17,6 +16,7 @@ ARG META=ghcr.io/datalens-tech/datalens-meta-manager:0.52.0@sha256:d3c0c6041506d
 ARG AUTH=ghcr.io/datalens-tech/datalens-auth:0.27.0@sha256:090194d29eb84fecec467afb032df2129e4d3a0b9560cb0c291047bb46bc51cd
 
 # ---------------------------------------------------------------- db: Postgres with the seven DataLens databases + key server
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${PG} AS db
 # Demo workbook off: it needs the control plane to be up while Postgres initialises, and a fresh BI tool should start empty.
 ENV INIT_DEMO_DATA=false \
@@ -29,6 +29,7 @@ ENTRYPOINT ["/usr/local/bin/railway-db-entrypoint.sh"]
 CMD ["postgres"]
 
 # ---------------------------------------------------------------- shared: key-fetching boot shim
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${TEMPORAL} AS temporal
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -48,6 +49,7 @@ ENV BIND_ON_IP=::0 \
     NAMESPACES=meta-manager
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/etc/temporal/init-temporal.sh"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${CONTROL} AS control-api
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -64,6 +66,7 @@ ENV KEYS_MAP="bi_private=US_DYNAMIC_AUTH_PRIVATE_KEY auth_public=AUTH__JWT_KEY c
     AUTH__JWT_ALGORITHM=PS256
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/etc/service/dl_api/run"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${DATA} AS data-api
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -82,6 +85,7 @@ ENV KEYS_MAP="bi_private=US_DYNAMIC_AUTH_PRIVATE_KEY auth_public=AUTH__JWT_KEY c
     AUTH__JWT_ALGORITHM=PS256
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/etc/service/dl_api/run"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${US} AS us
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -99,6 +103,7 @@ ENV KEYS_MAP="bi_public=BI_MASTER_TOKEN_PUBLIC_KEY_PRIMARY ui_public=UI_MASTER_T
     AUTH_ENABLED=true
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/opt/app/scripts/preflight.sh"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${UI} AS ui-api
 # No key set needed: this is the stock image in API mode, wrapped only so the mode is baked in rather than a literal variable.
 ENV APP_MODE=api \
@@ -107,6 +112,7 @@ ENV APP_MODE=api \
     US_ENDPOINT=http://us.railway.internal:8080 \
     BI_API_ENDPOINT=http://control-api.railway.internal:8080
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${META} AS meta-manager
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -123,6 +129,7 @@ ENV KEYS_MAP="temporal_private=TEMPORAL_AUTH_PRIVATE_KEY auth_public=AUTH_TOKEN_
     AUTH_ENABLED=true
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/opt/app/scripts/preflight.sh"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${AUTH} AS auth
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
@@ -138,6 +145,7 @@ ENV KEYS_MAP="auth_private=TOKEN_PRIVATE_KEY auth_public=TOKEN_PUBLIC_KEY" \
     DISABLE_WILDCARD_COOKIE=true
 ENTRYPOINT ["/usr/local/bin/railway-boot.sh", "/opt/app/scripts/preflight.sh"]
 
+# upstream: none component image of datalens-tech/datalens 2.9.0, tagged by component version, not by release
 FROM ${UI} AS ui
 USER root
 COPY railway-boot.sh /usr/local/bin/railway-boot.sh
